@@ -1,9 +1,9 @@
 {
   "name": "@xiaoqiong0v0/opencode-plugin-logger",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "type": "module",
-  "description": "File-based logger for OpenCode plugins, with companion file-tool plugin",
+  "description": "Configurable file-based logger for OpenCode plugins",
   "exports": { ".": "./logger.js" },
-  "files": ["logger.js", "file-tool.js", "command/"],
+  "files": ["logger.js"],
   "license": "MIT"
 }
