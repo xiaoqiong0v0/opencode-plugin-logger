@@ -1,4 +1,4 @@
-import { appendFileSync, mkdirSync, existsSync, readdirSync, unlinkSync, statSync, readFileSync } from "node:fs"
+import { appendFileSync, mkdirSync, existsSync, readdirSync, unlinkSync, statSync, readFileSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 import { homedir } from "node:os"
 
@@ -6,6 +6,7 @@ const pad = (n, w = 2) => String(n).padStart(w, "0")
 
 const GLOBAL_DIR = join(homedir(), ".config", "opencode")
 const CONFIG_NAME = "plugin-logger.jsonc"
+const CONFIG_PATH = join(GLOBAL_DIR, CONFIG_NAME)
 
 const defaults = {
   dir: join(homedir(), ".opencode", "plugins-log"),
@@ -13,6 +14,18 @@ const defaults = {
   retentionDays: 7,
   enabled: false,
 }
+
+const SAMPLE_CFG = `{
+  // 是否启用日志输出（默认 false）
+  "enabled": false,
+  // 日志文件输出目录
+  "dir": "${defaults.dir.replace(/\\/g, "/")}",
+  // 时间格式，SSS 为毫秒
+  "timeFormat": "${defaults.timeFormat}.SSS",
+  // 日志保留天数，0 为永不过期
+  "retentionDays": ${defaults.retentionDays}
+}
+`
 
 function readJsonc(path) {
   try {
@@ -22,7 +35,10 @@ function readJsonc(path) {
 }
 
 function resolveCfg(opts) {
-  const cfg = existsSync(join(GLOBAL_DIR, CONFIG_NAME)) ? readJsonc(join(GLOBAL_DIR, CONFIG_NAME)) : {}
+  if (!existsSync(CONFIG_PATH)) {
+    try { writeFileSync(CONFIG_PATH, SAMPLE_CFG, "utf-8") } catch {}
+  }
+  const cfg = existsSync(CONFIG_PATH) ? readJsonc(CONFIG_PATH) : {}
   return { ...defaults, ...cfg, ...(opts || {}) }
 }
 
