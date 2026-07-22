@@ -2,7 +2,7 @@ import { appendFileSync, mkdirSync, existsSync, readdirSync, unlinkSync, statSyn
 import { join } from "node:path"
 import { homedir } from "node:os"
 
-const pad = (n) => String(n).padStart(2, "0")
+const pad = (n, w = 2) => String(n).padStart(w, "0")
 
 const defaults = {
   dir: join(homedir(), ".opencode", "plugins-log"),
@@ -27,6 +27,7 @@ export default function createLogger(name, opts) {
     s = s.replace("HH", pad(d.getHours()))
     s = s.replace("mm", pad(d.getMinutes()))
     s = s.replace("ss", pad(d.getSeconds()))
+    s = s.replace("SSS", pad(d.getMilliseconds(), 3))
     return s
   }
 
