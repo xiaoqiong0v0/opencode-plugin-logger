@@ -1,4 +1,4 @@
-import { appendFileSync, mkdirSync, existsSync, readdirSync, unlinkSync, statSync, readFileSync, writeFileSync } from "node:fs"
+import { appendFileSync, mkdirSync, existsSync, readdirSync, unlinkSync, readFileSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 import { homedir } from "node:os"
 
@@ -96,17 +96,20 @@ export default function createLogger(name: string, opts?: LoggerOptions): Logger
 
   const cleanOld = (): void => {
     if (!cfg.retentionDays) return
-    const maxAge = cfg.retentionDays * 86400000
-    const now = Date.now()
+    const cutoff = new Date()
+    cutoff.setHours(0, 0, 0, 0)
+    cutoff.setDate(cutoff.getDate() - cfg.retentionDays)
     try {
       for (const f of readdirSync(logDir)) {
-        if (!f.match(/^\d{4}-\d{2}-\d{2}\.log$/)) continue
-        try {
-          if (now - statSync(join(logDir, f)).mtimeMs > maxAge) {
+        const m = f.match(/^(\d{4})(\d{2})(\d{2})\.log$/)
+        if (!m) continue
+        const fileDay = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]))
+        if (fileDay < cutoff) {
+          try {
             unlinkSync(join(logDir, f))
+          } catch {
+            // ignore
           }
-        } catch {
-          // ignore
         }
       }
     } catch {
